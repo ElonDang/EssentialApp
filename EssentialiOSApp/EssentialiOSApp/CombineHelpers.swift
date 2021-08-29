@@ -1,0 +1,140 @@
+//
+//  CombineHelpers.swift
+//  CombineHelpers
+//
+//  Created by Elon on 24/08/2021.
+//
+
+import Foundation
+import Combine
+import EssentialFeed
+
+extension HTTPClient {
+    typealias Publisher = AnyPublisher<(Data, HTTPURLResponse), Error>
+    
+    func loadPublisher(from url: URL) -> Publisher {
+        var task: HTTPClientTask?
+        return Deferred {
+            Future { completion in
+                task = get(from: url) { result in
+                    switch result {
+                    case let .failure(error):
+                        completion(.failure(error))
+                    case let .success((data, response)):
+                        completion(.success((data, response)))
+                    }
+                }
+            }
+        }
+        .handleEvents(receiveCancel: { task?.cancel() })
+        .eraseToAnyPublisher()
+    }
+}
+
+extension Publisher where Output == Data {
+    
+    func caching(to cache: FeedImageDataCache, for url: URL) -> AnyPublisher<Output, Failure> {
+        handleEvents(receiveOutput: { data in
+            cache.saveIgnoringResult(data: data, for: url)
+        })
+            .eraseToAnyPublisher()
+    }
+    
+}
+
+extension FeedImageDataCache {
+    func saveIgnoringResult(data: Data, for url: URL) {
+        self.save(data, for: url) { _ in }
+    }
+}
+
+public extension FeedImageDataLoader {
+    typealias Publisher = AnyPublisher<Data, Error>
+    
+    func loadPublisher(from url: URL) -> Publisher {
+        var task: FeedImageDataLoaderTask?
+        return Deferred {
+            Future { completion in
+                task = self.loadImageData(from: url, completion: completion)
+            }
+        }
+        .handleEvents(receiveCancel: { task?.cancel() })
+        .eraseToAnyPublisher()
+    }
+    
+}
+
+public extension LocalFeedLoader {
+    typealias Publisher = AnyPublisher<[FeedImage], Error>
+    
+    func loadPublisher() -> Publisher {
+        Deferred {
+            Future(self.load)
+        }
+        .eraseToAnyPublisher()
+    }
+    
+}
+
+extension Publisher where Output == [FeedImage] {
+    
+    func caching(to cache: FeedCache) -> AnyPublisher<Output, Failure> {
+        handleEvents(receiveOutput: cache.saveIgnoringResult)
+            .eraseToAnyPublisher()
+    }
+}
+
+extension FeedCache {
+    func saveIgnoringResult(feed: [FeedImage]) {
+        self.save(feed) { _ in }
+    }
+}
+
+extension Publisher {
+    func fallback(to fallbackPublisher: @escaping () -> AnyPublisher<Output, Failure>) -> AnyPublisher<Output, Failure> {
+        self.catch { _ in fallbackPublisher() }
+            .eraseToAnyPublisher()
+    }
+}
+
+extension Publisher {
+    func dispatchOnMainQueue() -> AnyPublisher<Output, Failure> {
+        receive(on: DispatchQueue.immediateWhenOnMainQueueScheduler)
+            .eraseToAnyPublisher()
+    }
+}
+
+extension DispatchQueue {
+    static var immediateWhenOnMainQueueScheduler: ImmediateWhenOnMainQueueScheduler {
+        ImmediateWhenOnMainQueueScheduler()
+    }
+
+    struct ImmediateWhenOnMainQueueScheduler: Scheduler {
+        typealias SchedulerTimeType = DispatchQueue.SchedulerTimeType
+        typealias SchedulerOptions = DispatchQueue.SchedulerOptions
+
+        var now: SchedulerTimeType {
+            DispatchQueue.main.now
+        }
+
+        var minimumTolerance: SchedulerTimeType.Stride {
+            DispatchQueue.main.minimumTolerance
+        }
+
+        func schedule(options: SchedulerOptions?, _ action: @escaping () -> Void) {
+            guard Thread.isMainThread else {
+                return DispatchQueue.main.schedule(options: options, action)
+            }
+
+            action()
+        }
+
+        func schedule(after date: SchedulerTimeType, tolerance: SchedulerTimeType.Stride, options: SchedulerOptions?, _ action: @escaping () -> Void) {
+            DispatchQueue.main.schedule(after: date, tolerance: tolerance, options: options, action)
+        }
+
+        func schedule(after date: SchedulerTimeType, interval: SchedulerTimeType.Stride, tolerance: SchedulerTimeType.Stride, options: SchedulerOptions?, _ action: @escaping () -> Void) -> Cancellable {
+            DispatchQueue.main.schedule(after: date, interval: interval, tolerance: tolerance, options: options, action)
+        }
+    }
+}

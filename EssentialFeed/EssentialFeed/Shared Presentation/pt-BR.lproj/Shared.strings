@@ -1,0 +1,9 @@
+/* 
+  Shared.strings
+  EssentialFeed
+
+  Created by Elon on 27/08/2021.
+  
+*/
+
+"GENERIC_CONNECTION_ERROR" = "Não foi possível conectar com o servidor";

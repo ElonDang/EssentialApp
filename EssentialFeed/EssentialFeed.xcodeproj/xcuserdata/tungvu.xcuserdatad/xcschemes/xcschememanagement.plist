@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>EssentialFeed.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>0</integer>
+		</dict>
+		<key>EssentialFeedAPIEndToEndTests.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+		<key>EssentialFeedCacheIntegrationTests.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>EssentialFeediOS.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>DF36F51C26C7884800C429AF</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>DF7CCF6426C7C6A900A42B9C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>DF7CCF6B26C7C6A900A42B9C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>DFB2962326C50BC000765A28</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>DFE249D726C4C01D00D08EDC</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>DFE249DF26C4C01E00D08EDC</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>
